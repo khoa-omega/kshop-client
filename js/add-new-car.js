@@ -5,6 +5,7 @@ const formCustomerName = document.getElementById("customer-name");
 const formCatalog = document.getElementById("catalog");
 const formCarMaker = document.getElementById("car-maker");
 const btnSave = document.getElementById("save");
+const BASE_URL = "https://kshop-server.onrender.com";
 
 form.addEventListener("submit", async e => {
 	e.preventDefault();
@@ -18,7 +19,7 @@ formRepairDate.setAttribute("max", today);
 
 async function save() {
 	showLoading();
-	const response = await fetch("http://localhost:8080/api/v1/cars", {
+	const response = await fetch(`${BASE_URL}/api/v1/cars`, {
 		method: "POST",
 		headers: {
 			"Accept-Language": "vi",

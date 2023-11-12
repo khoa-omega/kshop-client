@@ -14,6 +14,7 @@ const firstPage = document.getElementById("first-page");
 const prevPage = document.getElementById("prev-page");
 const nextPage = document.getElementById("next-page");
 const lastPage = document.getElementById("last-page");
+const BASE_URL = "https://kshop-server.onrender.com";
 
 form.addEventListener("submit", async function (e) {
 	e.preventDefault();
@@ -35,7 +36,7 @@ async function findAll() {
 		page: pageNumber.value,
 		size: pageSize.value
 	};
-	const url = new URL("http://localhost:8080/api/v1/cars");
+	const url = new URL(`${BASE_URL}/api/v1/cars`);
 	url.search = new URLSearchParams(params).toString();
 	const response = await fetch(url, {
 		method: "GET",
@@ -80,7 +81,7 @@ function showCars(cars) {
 
 async function deleteById(car) {
 	showLoading();
-	const response = await fetch("http://localhost:8080/api/v1/cars", {
+	const response = await fetch(`${BASE_URL}/api/v1/cars`, {
 		method: "DELETE",
 		headers: {
 			"Accept-Language": "vi",
@@ -140,7 +141,7 @@ function updatePagination({ first, last, pageable, totalPages }) {
 
 async function save() {
 	showLoading();
-	const response = await fetch("http://localhost:8080/api/v1/cars", {
+	const response = await fetch(`${BASE_URL}/api/v1/cars`, {
 		method: "PUT",
 		headers: {
 			"Accept-Language": "vi",
