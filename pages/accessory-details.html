@@ -2,11 +2,11 @@
 <html lang="vi">
 	<head>
 		<meta charset="utf-8" />
-		<title>KShop: Accessory details</title>
+		<title>KShop: Accessory Details</title>
 		<link
 			rel="stylesheet"
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-		<link rel="stylesheet" href="../css/accessory-details.css" />
+		<link rel="stylesheet" href="../styles/accessory-details.css" />
 	</head>
 	<body>
 		<header><h1>AUTOMOTIVE REPAIR</h1></header>
@@ -18,7 +18,6 @@
 					<p><a href="./car-management.html">Cars management</a></p>
 				</div>
 			</aside>
-			<div class="vr"></div>
 			<main>
 				<form id="accessory-form">
 					<p><b>ACCESSORY DETAILS:</b></p>
@@ -33,11 +32,12 @@
 							name="license-plate"
 							id="license-plate"
 							placeholder="29V7-65366"
+							disabled
 							required />
 					</div>
 					<div class="form-control">
 						<label for="repair-date">Repair date</label>
-						<input type="date" name="repair-date" id="repair-date" required />
+						<input type="date" name="repair-date" id="repair-date" disabled required />
 					</div>
 					<div class="form-control">
 						<label for="name">Name</label>
@@ -127,6 +127,6 @@
 			</main>
 		</div>
 		<footer><i>BASED ON SPRING FRAMEWORK</i></footer>
-		<script src="../js/accessory-details.js"></script>
+		<script src="../scripts/accessory-details.js"></script>
 	</body>
 </html>

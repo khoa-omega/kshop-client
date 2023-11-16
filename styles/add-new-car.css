@@ -1,11 +1,11 @@
 @font-face {
 	font-family: Agbalumo;
-	src: url(./fonts/Agbalumo-Regular.ttf);
+	src: url(../fonts/Agbalumo-Regular.ttf);
 }
 
 @font-face {
 	font-family: BungeeSpice;
-	src: url(./fonts/BungeeSpice-Regular.ttf);
+	src: url(../fonts/BungeeSpice-Regular.ttf);
 }
 
 :root {
@@ -27,7 +27,7 @@ html {
 }
 
 body {
-	cursor: url(./images/porsche-cursor.png), pointer;
+	cursor: url(../images/porsche-cursor.png), pointer;
 	min-width: 100vw;
 	min-height: 100vh;
 	font-family: Agbalumo;
@@ -35,7 +35,7 @@ body {
 	font-weight: normal;
 	line-height: 1.5;
 	color: var(--color);
-	background: url(./images/porsche-background.jpg) center / cover fixed no-repeat;
+	background: url(../images/porsche-background.jpg) center / cover fixed no-repeat;
 	display: flex;
 	flex-direction: column;
 }
@@ -71,7 +71,8 @@ a {
 	color: var(--color);
 	text-decoration: none;
 
-	&:hover {
+	&:hover,
+	&.active {
 		color: var(--color-active);
 		text-decoration: underline;
 	}
@@ -80,13 +81,49 @@ a {
 main {
 	flex: 1;
 	padding: 16px 24px;
+}
+
+form {
+	max-width: 560px;
+	padding: 16px 24px;
+	border-radius: 8px;
+	background-color: #25252599;
 	display: flex;
-	justify-content: center;
+	flex-direction: column;
+	row-gap: 16px;
+}
+
+.form-control {
+	display: flex;
+	flex-direction: column;
+
+	> label::after {
+		content: " *";
+		color: #f00;
+	}
+
+	& input {
+		height: 40px;
+		padding: 0 8px;
+		font-size: inherit;
+		font-family: inherit;
+	}
+}
+
+.form-submit {
+	display: flex;
+	justify-content: space-between;
 	align-items: center;
+
+	& button {
+		padding: 4px 12px;
+		font-size: inherit;
+		font-family: inherit;
+	}
 }
 
 footer {
 	text-align: center;
 	padding: 16px 24px;
-	background-color: inherit;
+	background-color: var(--background-color);
 }

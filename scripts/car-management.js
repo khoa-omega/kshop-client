@@ -1,13 +1,12 @@
-const form = document.getElementById("accessory-form");
+const form = document.getElementById("car-update-form");
 const formId = document.getElementById("id");
 const formLicensePlate = document.getElementById("license-plate");
 const formRepairDate = document.getElementById("repair-date");
-const formName = document.getElementById("name");
-const formPrice = document.getElementById("price");
-const formStatusDamaged = document.getElementById("status-damaged");
-const formRepairStatus = document.getElementById("repair-status");
+const formCustomerName = document.getElementById("customer-name");
+const formCatalog = document.getElementById("catalog");
+const formCarMaker = document.getElementById("car-maker");
 const btnSave = document.getElementById("save");
-const tbody = document.getElementById("accessories");
+const tbody = document.getElementById("cars");
 const loading = document.getElementById("loading");
 const pageNumber = document.getElementById("page");
 const pageSize = document.getElementById("size");
@@ -15,18 +14,12 @@ const firstPage = document.getElementById("first-page");
 const prevPage = document.getElementById("prev-page");
 const nextPage = document.getElementById("next-page");
 const lastPage = document.getElementById("last-page");
-const formatter = new Intl.NumberFormat("vi-VN");
 const BASE_URL = "https://kshop-server.onrender.com";
 
 form.addEventListener("submit", async function (e) {
 	e.preventDefault();
 	await save();
 	this.reset();
-});
-
-formPrice.addEventListener("input", function () {
-	const price = this.value.replace(/[,.]/g, "");
-	this.value = formatter.format(price);
 });
 
 pageSize.addEventListener("change", findAll);
@@ -43,7 +36,7 @@ async function findAll() {
 		page: pageNumber.value,
 		size: pageSize.value
 	};
-	const url = new URL(`${BASE_URL}/api/v1/accessories`);
+	const url = new URL(`${BASE_URL}/api/v1/cars`);
 	url.search = new URLSearchParams(params).toString();
 	const response = await fetch(url, {
 		method: "GET",
@@ -53,55 +46,53 @@ async function findAll() {
 		}
 	});
 	const page = await response.json();
-	console.log(page);
-	const accessories = page.content;
-	console.log(accessories);
+	const cars = page.content;
+	console.log(cars);
 
-	showAccessories(accessories);
+	showCars(cars);
 	updatePagination(page);
 	hideLoading();
 }
 
-function showAccessories(accessories) {
+function showCars(cars) {
 	tbody.innerHTML = "";
-	for (const accessory of accessories) {
+	for (const car of cars) {
 		const row = tbody.insertRow();
-		row.push(accessory.id);
-		row.push(accessory.licensePlate);
-		row.push(accessory.repairDate);
-		row.push(accessory.name);
-		row.push(formatter.format(accessory.price));
-		row.push(accessory.statusDamaged);
-		row.push(accessory.repairStatus);
+		row.push(car.licensePlate);
+		row.push(car.repairDate);
+		row.push(car.customerName);
+		row.push(car.catalog);
+		row.push(car.carMaker);
 
-		const btnEdit = createButton("🖊️ Edit", function () {
-			formId.value = accessory.id;
-			formLicensePlate.value = accessory.licensePlate;
-			formRepairDate.value = accessory.repairDate;
-			formName.value = accessory.name;
-			formPrice.value = formatter.format(accessory.price);
-			formStatusDamaged.value = accessory.statusDamaged;
-			formRepairStatus.value = accessory.repairStatus;
+		const btnEdit = createButton("🖊️", function () {
+			formLicensePlate.value = car.licensePlate;
+			formRepairDate.value = car.repairDate;
+			formCustomerName.value = car.customerName;
+			formCatalog.value = car.catalog;
+			formCarMaker.value = car.carMaker;
 		});
-		const btnDelete = createButton("❌ Delete", function () {
-			const confirmed = confirm("Do you want to delete this accessory?");
-			if (confirmed) deleteById(accessory.id);
+		const btnDelete = createButton("❌", function () {
+			const confirmed = confirm("Do you want to delete this car?");
+			if (confirmed) deleteById(car);
 		});
 		row.insertCell().append(btnEdit, btnDelete);
 	}
 }
 
-async function deleteById(id) {
+async function deleteById(car) {
 	showLoading();
-	const url = `${BASE_URL}/api/v1/accessories/${id}`;
-	const response = await fetch(url, {
+	const response = await fetch(`${BASE_URL}/api/v1/cars`, {
 		method: "DELETE",
 		headers: {
 			"Accept-Language": "vi",
 			"Content-Type": "application/json"
-		}
+		},
+		body: JSON.stringify({
+			licensePlate: car.licensePlate,
+			repairDate: car.repairDate
+		})
 	});
-	console.log(`deleteById(${id}): ${response.ok}`);
+	console.log(`deleteById(${car.licensePlate}, ${car.repairDate}): ${response.ok}`);
 	if (response.ok) await findAll();
 	hideLoading();
 }
@@ -150,13 +141,8 @@ function updatePagination({ first, last, pageable, totalPages }) {
 
 async function save() {
 	showLoading();
-	const id = formId.value;
-	const url = id
-		? `${BASE_URL}/api/v1/accessories/${id}`
-		: `${BASE_URL}/api/v1/accessories`;
-	const method = id ? "PUT" : "POST";
-	const response = await fetch(url, {
-		method: method,
+	const response = await fetch(`${BASE_URL}/api/v1/cars`, {
+		method: "PUT",
 		headers: {
 			"Accept-Language": "vi",
 			"Content-Type": "application/json"
@@ -164,10 +150,9 @@ async function save() {
 		body: JSON.stringify({
 			licensePlate: formLicensePlate.value,
 			repairDate: formRepairDate.value,
-			name: formName.value,
-			price: formPrice.value.replace(/[,.]/g, ""),
-			statusDamaged: formStatusDamaged.value,
-			repairStatus: formRepairStatus.value
+			customerName: formCustomerName.value,
+			catalog: formCatalog.value,
+			carMaker: formCarMaker.value
 		})
 	});
 	const json = await response.json();
@@ -192,12 +177,9 @@ HTMLTableRowElement.prototype.push = function (data) {
 function showLoading() {
 	loading.style.display = "flex";
 
-	formLicensePlate.setAttribute("disabled", "");
-	formRepairDate.setAttribute("disabled", "");
-	formName.setAttribute("disabled", "");
-	formPrice.setAttribute("disabled", "");
-	formStatusDamaged.setAttribute("disabled", "");
-	formRepairStatus.setAttribute("disabled", "");
+	formCustomerName.setAttribute("disabled", "");
+	formCatalog.setAttribute("disabled", "");
+	formCarMaker.setAttribute("disabled", "");
 	btnSave.setAttribute("disabled", "");
 }
 
@@ -205,12 +187,9 @@ function hideLoading() {
 	setTimeout(function () {
 		loading.style.display = "none";
 
-		formLicensePlate.removeAttribute("disabled");
-		formRepairDate.removeAttribute("disabled");
-		formName.removeAttribute("disabled");
-		formPrice.removeAttribute("disabled");
-		formStatusDamaged.removeAttribute("disabled");
-		formRepairStatus.removeAttribute("disabled");
+		formCustomerName.removeAttribute("disabled");
+		formCatalog.removeAttribute("disabled");
+		formCarMaker.removeAttribute("disabled");
 		btnSave.removeAttribute("disabled");
 	}, Math.random() * 2000);
 }
