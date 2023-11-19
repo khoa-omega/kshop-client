@@ -1,43 +1,57 @@
+const BASE_URL = "https://kshop-server.onrender.com";
 const form = document.getElementById("car-update-form");
-const formId = document.getElementById("id");
-const formLicensePlate = document.getElementById("license-plate");
-const formRepairDate = document.getElementById("repair-date");
-const formCustomerName = document.getElementById("customer-name");
-const formCatalog = document.getElementById("catalog");
-const formCarMaker = document.getElementById("car-maker");
-const btnSave = document.getElementById("save");
-const tbody = document.getElementById("cars");
 const loading = document.getElementById("loading");
-const pageNumber = document.getElementById("page");
 const pageSize = document.getElementById("size");
 const firstPage = document.getElementById("first-page");
 const prevPage = document.getElementById("prev-page");
+const pageNumber = document.getElementById("page");
 const nextPage = document.getElementById("next-page");
 const lastPage = document.getElementById("last-page");
-const BASE_URL = "https://kshop-server.onrender.com";
+const tbody = document.getElementById("cars");
+const inputs = document.getElementsByTagName("input");
+const buttons = document.getElementsByTagName("button");
+const selects = document.getElementsByTagName("select");
+
+const [today] = new Date().toISOString().split("T");
+form.repairDate.setAttribute("value", today);
+form.repairDate.setAttribute("max", today);
 
 form.addEventListener("submit", async function (e) {
 	e.preventDefault();
-	await save();
-	this.reset();
+	const data = new FormData(this);
+	showLoading();
+	const car = Object.fromEntries(data.entries());
+	const savedCar = await save(car);
+	log("Saved car:", savedCar, "#27ae60");
+	const page = await findAll();
+	setTimeout(() => {
+		this.reset();
+		hideLoading();
+		updatePagination(page);
+	}, Math.random() * 2000);
 });
 
-pageSize.addEventListener("change", findAll);
+pageSize.addEventListener("change", refresh);
 
-const [today] = new Date().toISOString().split("T");
-formRepairDate.value = today;
-formRepairDate.setAttribute("max", today);
+refresh();
 
-findAll();
+async function refresh() {
+	showLoading();
+	const page = await findAll();
+	setTimeout(() => {
+		hideLoading();
+		updatePagination(page);
+	}, Math.random() * 2000);
+}
 
 async function findAll() {
-	showLoading();
 	const params = {
 		page: pageNumber.value,
 		size: pageSize.value
 	};
 	const url = new URL(`${BASE_URL}/api/v1/cars`);
 	url.search = new URLSearchParams(params).toString();
+	console.log(`%cFinding all car:\n${url}`, "color: #2980b9");
 	const response = await fetch(url, {
 		method: "GET",
 		headers: {
@@ -46,41 +60,66 @@ async function findAll() {
 		}
 	});
 	const page = await response.json();
-	const cars = page.content;
-	console.log(cars);
-
-	showCars(cars);
-	updatePagination(page);
-	hideLoading();
+	log("Found all car:", page, "#27ae60");
+	showCars(page.content);
+	return page;
 }
 
 function showCars(cars) {
 	tbody.innerHTML = "";
 	for (const car of cars) {
 		const row = tbody.insertRow();
-		row.push(car.licensePlate);
-		row.push(car.repairDate);
-		row.push(car.customerName);
-		row.push(car.catalog);
-		row.push(car.carMaker);
-
+		for (const key in car) {
+			const node = document.createTextNode(car[key]);
+			row.insertCell().appendChild(node);
+		}
 		const btnEdit = createButton("🖊️", function () {
-			formLicensePlate.value = car.licensePlate;
-			formRepairDate.value = car.repairDate;
-			formCustomerName.value = car.customerName;
-			formCatalog.value = car.catalog;
-			formCarMaker.value = car.carMaker;
+			for (const key in car) {
+				form[key].value = car[key];
+			}
 		});
-		const btnDelete = createButton("❌", function () {
+		const btnDelete = createButton("❌", async function () {
 			const confirmed = confirm("Do you want to delete this car?");
-			if (confirmed) deleteById(car);
+			if (confirmed) {
+				showLoading();
+				const ok = await deleteById(car);
+				if (ok) {
+					const page = await findAll();
+					hideLoading();
+					updatePagination(page);
+				} else {
+					hideLoading();
+				}
+			}
 		});
 		row.insertCell().append(btnEdit, btnDelete);
 	}
 }
 
-async function deleteById(car) {
-	showLoading();
+function createButton(text, click) {
+	const btn = document.createElement("button");
+	btn.setAttribute("type", "button");
+	const node = document.createTextNode(text);
+	btn.appendChild(node);
+	btn.addEventListener("click", click);
+	return btn;
+}
+
+async function save(car) {
+	log("Saving car:", car, "#2980b9");
+	const response = await fetch(`${BASE_URL}/api/v1/cars`, {
+		method: "PUT",
+		headers: {
+			"Accept-Language": "vi",
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify(car)
+	});
+	return await response.json();
+}
+
+async function deleteById({ licensePlate, repairDate }) {
+	console.log(`%cDeleting car: ${licensePlate} - ${repairDate}`, "color: $2980b9");
 	const response = await fetch(`${BASE_URL}/api/v1/cars`, {
 		method: "DELETE",
 		headers: {
@@ -88,13 +127,15 @@ async function deleteById(car) {
 			"Content-Type": "application/json"
 		},
 		body: JSON.stringify({
-			licensePlate: car.licensePlate,
-			repairDate: car.repairDate
+			licensePlate: licensePlate,
+			repairDate: repairDate
 		})
 	});
-	console.log(`deleteById(${car.licensePlate}, ${car.repairDate}): ${response.ok}`);
-	if (response.ok) await findAll();
-	hideLoading();
+	console.log(
+		`%cIs car (${licensePlate} - ${repairDate}) deleted: ${response.ok}`,
+		"color: #27ae60"
+	);
+	return response.ok;
 }
 
 function updatePagination({ first, last, pageable, totalPages }) {
@@ -115,81 +156,44 @@ function updatePagination({ first, last, pageable, totalPages }) {
 		nextPage.removeAttribute("disabled");
 		lastPage.removeAttribute("disabled");
 	}
-	pageNumber.onchange = function () {
-		if (this.value < 1 || this.value > totalPages) {
-			this.value = currentPage;
-		}
-		findAll();
+	const goToPage = page => () => {
+		pageNumber.value = page;
+		refresh();
 	};
-	firstPage.onclick = function () {
-		pageNumber.value = 1;
-		findAll();
-	};
-	prevPage.onclick = function () {
-		pageNumber.value = currentPage - 1;
-		findAll();
-	};
-	nextPage.onclick = function () {
-		pageNumber.value = currentPage + 1;
-		findAll();
-	};
-	lastPage.onclick = function () {
-		pageNumber.value = totalPages;
-		findAll();
-	};
+	pageNumber.onchange = refresh;
+	firstPage.onclick = goToPage(1);
+	prevPage.onclick = goToPage(currentPage - 1);
+	nextPage.onclick = goToPage(currentPage + 1);
+	lastPage.onclick = goToPage(totalPages);
 }
-
-async function save() {
-	showLoading();
-	const response = await fetch(`${BASE_URL}/api/v1/cars`, {
-		method: "PUT",
-		headers: {
-			"Accept-Language": "vi",
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify({
-			licensePlate: formLicensePlate.value,
-			repairDate: formRepairDate.value,
-			customerName: formCustomerName.value,
-			catalog: formCatalog.value,
-			carMaker: formCarMaker.value
-		})
-	});
-	const json = await response.json();
-	console.log(json);
-	await findAll();
-	hideLoading();
-}
-
-function createButton(text, click) {
-	const btn = document.createElement("button");
-	const node = document.createTextNode(text);
-	btn.appendChild(node);
-	btn.addEventListener("click", click);
-	return btn;
-}
-
-HTMLTableRowElement.prototype.push = function (data) {
-	const node = document.createTextNode(data);
-	this.insertCell().appendChild(node);
-};
 
 function showLoading() {
-	loading.style.display = "flex";
-
-	formCustomerName.setAttribute("disabled", "");
-	formCatalog.setAttribute("disabled", "");
-	formCarMaker.setAttribute("disabled", "");
-	btnSave.setAttribute("disabled", "");
+	for (const input of inputs) {
+		input.setAttribute("disabled", "");
+	}
+	for (const button of buttons) {
+		button.setAttribute("disabled", "");
+	}
+	for (const select of selects) {
+		select.setAttribute("disabled", "");
+	}
+	loading.style.display = "grid";
 }
 
 function hideLoading() {
-	setTimeout(function () {
-		loading.style.display = "none";
+	for (const input of inputs) {
+		input.removeAttribute("disabled");
+	}
+	for (const button of buttons) {
+		button.removeAttribute("disabled");
+	}
+	for (const select of selects) {
+		select.removeAttribute("disabled");
+	}
+	loading.style.display = "none";
+}
 
-		formCustomerName.removeAttribute("disabled");
-		formCatalog.removeAttribute("disabled");
-		formCarMaker.removeAttribute("disabled");
-		btnSave.removeAttribute("disabled");
-	}, Math.random() * 2000);
+function log(prefix, object, color) {
+	const json = JSON.stringify(object, undefined, 4);
+	console.log(`%c${prefix}:\n${json}`, `color: ${color}`);
 }

@@ -1,50 +1,64 @@
+const BASE_URL = "https://kshop-server.onrender.com";
+const FORMATTER = new Intl.NumberFormat("vi-VN");
 const form = document.getElementById("accessory-form");
-const formId = document.getElementById("id");
-const formLicensePlate = document.getElementById("license-plate");
-const formRepairDate = document.getElementById("repair-date");
-const formName = document.getElementById("name");
-const formPrice = document.getElementById("price");
-const formStatusDamaged = document.getElementById("status-damaged");
-const formRepairStatus = document.getElementById("repair-status");
-const btnSave = document.getElementById("save");
-const tbody = document.getElementById("accessories");
 const loading = document.getElementById("loading");
-const pageNumber = document.getElementById("page");
 const pageSize = document.getElementById("size");
 const firstPage = document.getElementById("first-page");
 const prevPage = document.getElementById("prev-page");
+const pageNumber = document.getElementById("page");
 const nextPage = document.getElementById("next-page");
 const lastPage = document.getElementById("last-page");
-const formatter = new Intl.NumberFormat("vi-VN");
-const BASE_URL = "https://kshop-server.onrender.com";
+const tbody = document.getElementById("accessories");
+const inputs = document.getElementsByTagName("input");
+const buttons = document.getElementsByTagName("button");
+const selects = document.getElementsByTagName("select");
+
+const [today] = new Date().toISOString().split("T");
+form.repairDate.setAttribute("value", today);
+form.repairDate.setAttribute("max", today);
 
 form.addEventListener("submit", async function (e) {
 	e.preventDefault();
-	await save();
-	this.reset();
+	const data = new FormData(this);
+	showLoading();
+	const accessory = Object.fromEntries(data.entries());
+	accessory.price = FORMATTER.format(accessory.price);
+	const savedAccessory = await save(accessory);
+	log("Saved accessory:", savedAccessory, "#27ae60");
+	const page = await findAll();
+	setTimeout(() => {
+		this.reset();
+		hideLoading();
+		updatePagination(page);
+	}, Math.random() * 2000);
 });
 
-formPrice.addEventListener("input", function () {
+form.price.addEventListener("input", function () {
 	const price = this.value.replace(/[,.]/g, "");
-	this.value = formatter.format(price);
+	this.value = FORMATTER.format(price);
 });
 
-pageSize.addEventListener("change", findAll);
+pageSize.addEventListener("change", refresh);
 
-const [today] = new Date().toISOString().split("T");
-formRepairDate.value = today;
-formRepairDate.setAttribute("max", today);
+refresh();
 
-findAll();
+async function refresh() {
+	showLoading();
+	const page = await findAll();
+	setTimeout(() => {
+		hideLoading();
+		updatePagination(page);
+	}, Math.random() * 2000);
+}
 
 async function findAll() {
-	showLoading();
 	const params = {
 		page: pageNumber.value,
 		size: pageSize.value
 	};
 	const url = new URL(`${BASE_URL}/api/v1/accessories`);
 	url.search = new URLSearchParams(params).toString();
+	console.log(`%cFinding all accessory:\n${url}`, "color: #2980b9");
 	const response = await fetch(url, {
 		method: "GET",
 		headers: {
@@ -53,57 +67,81 @@ async function findAll() {
 		}
 	});
 	const page = await response.json();
-	console.log(page);
-	const accessories = page.content;
-	console.log(accessories);
-
-	showAccessories(accessories);
-	updatePagination(page);
-	hideLoading();
+	log("Found all accessory:", page, "#27ae60");
+	showAccessories(page.content);
+	return page;
 }
 
 function showAccessories(accessories) {
 	tbody.innerHTML = "";
 	for (const accessory of accessories) {
+		accessory.price = FORMATTER.format(accessory.price);
 		const row = tbody.insertRow();
-		row.push(accessory.id);
-		row.push(accessory.licensePlate);
-		row.push(accessory.repairDate);
-		row.push(accessory.name);
-		row.push(formatter.format(accessory.price));
-		row.push(accessory.statusDamaged);
-		row.push(accessory.repairStatus);
+		for (const key in accessory) {
+			const node = document.createTextNode(accessory[key]);
+			row.insertCell().appendChild(node);
+		}
 
 		const btnEdit = createButton("🖊️", function () {
-			formId.value = accessory.id;
-			formLicensePlate.value = accessory.licensePlate;
-			formRepairDate.value = accessory.repairDate;
-			formName.value = accessory.name;
-			formPrice.value = formatter.format(accessory.price);
-			formStatusDamaged.value = accessory.statusDamaged;
-			formRepairStatus.value = accessory.repairStatus;
+			for (const key in accessory) {
+				form[key].value = accessory[key];
+			}
 		});
-		const btnDelete = createButton("❌", function () {
+		const btnDelete = createButton("❌", async function () {
 			const confirmed = confirm("Do you want to delete this accessory?");
-			if (confirmed) deleteById(accessory.id);
+			if (confirmed) {
+				showLoading();
+				const ok = await deleteById(accessory.id);
+				if (ok) {
+					const page = await findAll();
+					hideLoading();
+					updatePagination(page);
+				} else {
+					hideLoading();
+				}
+			}
 		});
 		row.insertCell().append(btnEdit, btnDelete);
 	}
 }
 
+function createButton(text, click) {
+	const btn = document.createElement("button");
+	btn.setAttribute("type", "button");
+	const node = document.createTextNode(text);
+	btn.appendChild(node);
+	btn.addEventListener("click", click);
+	return btn;
+}
+
 async function deleteById(id) {
-	showLoading();
-	const url = `${BASE_URL}/api/v1/accessories/${id}`;
-	const response = await fetch(url, {
+	console.log(`%cDeleting accessory: ${id}`, "color: $2980b9");
+	const response = await fetch(`${BASE_URL}/api/v1/accessories/${id}`, {
 		method: "DELETE",
 		headers: {
 			"Accept-Language": "vi",
 			"Content-Type": "application/json"
 		}
 	});
-	console.log(`deleteById(${id}): ${response.ok}`);
-	if (response.ok) await findAll();
-	hideLoading();
+	console.log(`%cIs accessory (${id}) deleted: ${response.ok}`, "color: #27ae60");
+	return response.ok;
+}
+
+async function save(accessory) {
+	log("Saving accessory:", accessory, "#2980b9");
+	const url = accessory.id
+		? `${BASE_URL}/api/v1/accessories/${id}`
+		: `${BASE_URL}/api/v1/accessories`;
+	const method = accessory.id ? "PUT" : "POST";
+	const response = await fetch(url, {
+		method: method,
+		headers: {
+			"Accept-Language": "vi",
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify(accessory)
+	});
+	return await response.json();
 }
 
 function updatePagination({ first, last, pageable, totalPages }) {
@@ -124,87 +162,44 @@ function updatePagination({ first, last, pageable, totalPages }) {
 		nextPage.removeAttribute("disabled");
 		lastPage.removeAttribute("disabled");
 	}
-	pageNumber.onchange = function () {
-		if (this.value < 1 || this.value > totalPages) {
-			this.value = currentPage;
-		}
-		findAll();
+	const goToPage = page => () => {
+		pageNumber.value = page;
+		refresh();
 	};
-	firstPage.onclick = function () {
-		pageNumber.value = 1;
-		findAll();
-	};
-	prevPage.onclick = function () {
-		pageNumber.value = currentPage - 1;
-		findAll();
-	};
-	nextPage.onclick = function () {
-		pageNumber.value = currentPage + 1;
-		findAll();
-	};
-	lastPage.onclick = function () {
-		pageNumber.value = totalPages;
-		findAll();
-	};
+	pageNumber.onchange = refresh;
+	firstPage.onclick = goToPage(1);
+	prevPage.onclick = goToPage(currentPage - 1);
+	nextPage.onclick = goToPage(currentPage + 1);
+	lastPage.onclick = goToPage(totalPages);
 }
-
-async function save() {
-	showLoading();
-	const id = formId.value;
-	const url = id ? `${BASE_URL}/api/v1/accessories/${id}` : `${BASE_URL}/api/v1/accessories`;
-	const method = id ? "PUT" : "POST";
-	const response = await fetch(url, {
-		method: method,
-		headers: {
-			"Accept-Language": "vi",
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify({
-			licensePlate: formLicensePlate.value,
-			repairDate: formRepairDate.value,
-			name: formName.value,
-			price: formPrice.value.replace(/[,.]/g, ""),
-			statusDamaged: formStatusDamaged.value,
-			repairStatus: formRepairStatus.value
-		})
-	});
-	const json = await response.json();
-	console.log(json);
-	await findAll();
-	hideLoading();
-}
-
-function createButton(text, click) {
-	const btn = document.createElement("button");
-	const node = document.createTextNode(text);
-	btn.appendChild(node);
-	btn.addEventListener("click", click);
-	return btn;
-}
-
-HTMLTableRowElement.prototype.push = function (data) {
-	const node = document.createTextNode(data);
-	this.insertCell().appendChild(node);
-};
 
 function showLoading() {
-	loading.style.display = "flex";
-
-	formName.setAttribute("disabled", "");
-	formPrice.setAttribute("disabled", "");
-	formStatusDamaged.setAttribute("disabled", "");
-	formRepairStatus.setAttribute("disabled", "");
-	btnSave.setAttribute("disabled", "");
+	for (const input of inputs) {
+		input.setAttribute("disabled", "");
+	}
+	for (const button of buttons) {
+		button.setAttribute("disabled", "");
+	}
+	for (const select of selects) {
+		select.setAttribute("disabled", "");
+	}
+	loading.style.display = "grid";
 }
 
 function hideLoading() {
-	setTimeout(function () {
-		loading.style.display = "none";
+	for (const input of inputs) {
+		input.removeAttribute("disabled");
+	}
+	for (const button of buttons) {
+		button.removeAttribute("disabled");
+	}
+	for (const select of selects) {
+		select.removeAttribute("disabled");
+	}
+	loading.style.display = "none";
+}
 
-		formName.removeAttribute("disabled");
-		formPrice.removeAttribute("disabled");
-		formStatusDamaged.removeAttribute("disabled");
-		formRepairStatus.removeAttribute("disabled");
-		btnSave.removeAttribute("disabled");
-	}, Math.random() * 2000);
+function log(prefix, object, color) {
+	const json = JSON.stringify(object, undefined, 4);
+	console.log(`%c${prefix}:\n${json}`, `color: ${color}`);
 }

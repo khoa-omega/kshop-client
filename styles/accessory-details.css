@@ -1,3 +1,5 @@
+/* ----- COMMON ----- */
+
 @font-face {
 	font-family: Agbalumo;
 	src: url(../fonts/Agbalumo-Regular.ttf);
@@ -9,12 +11,13 @@
 }
 
 :root {
-	--color: #fff;
-	--color-active: #1e90ff;
+	--color: #ffffff;
+	--color-active: #4bcffa;
 	--background-color: #252525;
-	--border-color: #fff;
-	--background-color-odd: #7ed6df;
-	--background-color-even: #22a6b3;
+	--border-color: #ffffff;
+	--background-color-odd: #1dd1a1;
+	--background-color-even: #10ac84;
+	--background-color-hover: #01a3a4;
 }
 
 html {
@@ -30,23 +33,53 @@ html {
 }
 
 body {
-	cursor: url(../images/porsche-cursor.png), pointer;
-	min-width: 100vw;
-	min-height: 100vh;
+	cursor: url(../images/cursor_default.png), default;
+	min-height: 100dvh;
 	font-family: Agbalumo;
 	font-size: clamp(1em, 3vmin, 1.25em);
 	font-weight: normal;
 	line-height: 1.5;
 	color: var(--color);
-	background: url(../images/porsche-background.jpg) center / cover fixed no-repeat;
+	background: url(../images/background.webp) center / cover fixed no-repeat;
 	display: flex;
 	flex-direction: column;
 }
+
+/* ----- HEADER ----- */
 
 header {
 	font-family: BungeeSpice;
 	text-align: center;
 	padding: 16px 24px;
+}
+
+/* ----- BODY ----- */
+
+p:first-child {
+	font-family: BungeeSpice;
+}
+
+a {
+	color: var(--color);
+	text-decoration: none;
+	cursor: url(../images/cursor_pointer.png), pointer;
+
+	&.active,
+	&:hover {
+		color: var(--color-active);
+		text-decoration: underline;
+	}
+}
+
+button {
+	font-size: inherit;
+	font-family: inherit;
+	cursor: url(../images/cursor_pointer.png), pointer;
+}
+
+input {
+	font-size: inherit;
+	font-family: inherit;
 }
 
 .container {
@@ -64,21 +97,6 @@ aside {
 	row-gap: 16px;
 	position: sticky;
 	top: 16px;
-}
-
-p:first-child {
-	font-family: BungeeSpice;
-}
-
-a {
-	color: var(--color);
-	text-decoration: none;
-
-	&:hover,
-	&.active {
-		color: var(--color-active);
-		text-decoration: underline;
-	}
 }
 
 main {
@@ -105,28 +123,24 @@ form {
 
 	> label::after {
 		content: " *";
-		color: #f00;
+		color: #ff0000;
 	}
 
-	& input {
+	> input {
 		height: 40px;
 		padding: 0 8px;
-		font-size: inherit;
-		font-family: inherit;
 	}
 }
 
 .form-submit button {
 	padding: 4px 12px;
-	font-size: inherit;
-	font-family: inherit;
 }
 
-.data {
+.loading-wrapper {
 	position: relative;
 }
 
-.table-container {
+.table-wrapper {
 	max-height: 400px;
 	overflow: scroll;
 	border: 1px solid var(--border-color);
@@ -135,8 +149,8 @@ form {
 table {
 	width: 100%;
 	height: 100%;
-	border-collapse: collapse;
 	color: var(--color);
+	border-spacing: 0;
 }
 
 thead {
@@ -151,7 +165,7 @@ thead {
 
 		&:hover {
 			color: var(--color);
-			background-color: var(--color-active);
+			background-color: var(--background-color-hover);
 		}
 	}
 }
@@ -166,11 +180,7 @@ tbody {
 	}
 
 	& tr:hover {
-		background-color: var(--color-active);
-	}
-
-	& td:nth-child(5) {
-		text-align: right;
+		background-color: var(--background-color-hover);
 	}
 
 	& td:last-child {
@@ -184,8 +194,6 @@ tbody {
 
 		& button {
 			padding: 4px 12px;
-			font-size: inherit;
-			font-family: inherit;
 		}
 	}
 }
@@ -197,27 +205,24 @@ tbody {
 	bottom: 0;
 	left: 0;
 	background-color: var(--background-color);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
+	display: grid;
 
-.loading-icon {
-	width: 32px;
-	height: 32px;
-	border-radius: 50%;
-	border-width: 4px;
-	border-style: solid;
-	border-color: #d87093 transparent;
-	animation: rotate 400ms linear infinite;
+	&::after {
+		content: "";
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		border-width: 4px;
+		border-style: solid;
+		border-color: #d87093 transparent;
+		animation: rotate 400ms linear infinite;
+		place-self: center;
+	}
 }
 
 @keyframes rotate {
-	0% {
-		transform: rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg);
+	to {
+		rotate: 1turn;
 	}
 }
 
@@ -228,28 +233,27 @@ tbody {
 	margin-top: 8px;
 }
 
-.pagination-size select {
+.pagination-size > select {
 	padding: 0 8px;
 	font-size: inherit;
 	font-family: inherit;
+	cursor: url(../images/cursor_pointer.png), pointer;
 }
 
 .pagination-controls {
 	display: flex;
 
-	& input {
+	> input {
 		width: 56px;
 		text-align: center;
-		font-size: inherit;
-		font-family: inherit;
 	}
 
-	& button {
+	> button {
 		width: 48px;
-		font-family: inherit;
-		font-size: inherit;
 	}
 }
+
+/* ----- FOOTER ----- */
 
 footer {
 	text-align: center;

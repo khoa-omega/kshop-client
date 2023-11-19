@@ -1,3 +1,5 @@
+/* ----- COMMON ----- */
+
 @font-face {
 	font-family: Agbalumo;
 	src: url(../fonts/Agbalumo-Regular.ttf);
@@ -9,8 +11,8 @@
 }
 
 :root {
-	--color: #fff;
-	--color-active: #1e90ff;
+	--color: #ffffff;
+	--color-active: #4bcffa;
 	--background-color: #252525;
 }
 
@@ -27,23 +29,53 @@ html {
 }
 
 body {
-	cursor: url(../images/porsche-cursor.png), pointer;
-	min-width: 100vw;
-	min-height: 100vh;
+	cursor: url(../images/cursor_default.png), default;
+	min-height: 100dvh;
 	font-family: Agbalumo;
 	font-size: clamp(1em, 3vmin, 1.25em);
 	font-weight: normal;
 	line-height: 1.5;
 	color: var(--color);
-	background: url(../images/porsche-background.jpg) center / cover fixed no-repeat;
+	background: url(../images/background.webp) center / cover fixed no-repeat;
 	display: flex;
 	flex-direction: column;
 }
+
+/* ----- HEADER ----- */
 
 header {
 	font-family: BungeeSpice;
 	text-align: center;
 	padding: 16px 24px;
+}
+
+/* ----- BODY ----- */
+
+p:first-child {
+	font-family: BungeeSpice;
+}
+
+a {
+	color: var(--color);
+	text-decoration: none;
+	cursor: url(../images/cursor_pointer.png), pointer;
+
+	&.active,
+	&:hover {
+		color: var(--color-active);
+		text-decoration: underline;
+	}
+}
+
+button {
+	font-size: inherit;
+	font-family: inherit;
+	cursor: url(../images/cursor_pointer.png), pointer;
+}
+
+input {
+	font-size: inherit;
+	font-family: inherit;
 }
 
 .container {
@@ -61,21 +93,6 @@ aside {
 	row-gap: 16px;
 	position: sticky;
 	top: 16px;
-}
-
-p:first-child {
-	font-family: BungeeSpice;
-}
-
-a {
-	color: var(--color);
-	text-decoration: none;
-
-	&:hover,
-	&.active {
-		color: var(--color-active);
-		text-decoration: underline;
-	}
 }
 
 main {
@@ -99,14 +116,12 @@ form {
 
 	> label::after {
 		content: " *";
-		color: #f00;
+		color: #ff0000;
 	}
 
-	& input {
+	> input {
 		height: 40px;
 		padding: 0 8px;
-		font-size: inherit;
-		font-family: inherit;
 	}
 }
 
@@ -115,12 +130,45 @@ form {
 	justify-content: space-between;
 	align-items: center;
 
+	& .save-wrapper {
+		display: inline-block;
+		position: relative;
+	}
+
 	& button {
 		padding: 4px 12px;
-		font-size: inherit;
-		font-family: inherit;
 	}
 }
+
+#loading {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: var(--background-color);
+	display: none;
+
+	&::after {
+		content: "";
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		border-width: 4px;
+		border-style: solid;
+		border-color: #d87093 transparent;
+		animation: rotate 400ms linear infinite;
+		place-self: center;
+	}
+}
+
+@keyframes rotate {
+	to {
+		rotate: 1turn;
+	}
+}
+
+/* ----- FOOTER ----- */
 
 footer {
 	text-align: center;

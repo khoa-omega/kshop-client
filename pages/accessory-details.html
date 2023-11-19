@@ -2,7 +2,9 @@
 <html lang="vi">
 	<head>
 		<meta charset="utf-8" />
-		<title>KShop: Accessory Details</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>KShop | Accessory Details</title>
+		<link type="image/png" sizes="32x32" rel="icon" href="../images/favicon.png" />
 		<link
 			rel="stylesheet"
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
@@ -29,7 +31,7 @@
 						<label for="license-plate">License plate</label>
 						<input
 							type="text"
-							name="license-plate"
+							name="licensePlate"
 							id="license-plate"
 							placeholder="30H-666.66"
 							disabled
@@ -37,76 +39,96 @@
 					</div>
 					<div class="form-control">
 						<label for="repair-date">Repair date</label>
-						<input type="date" name="repair-date" id="repair-date" disabled required />
+						<input type="date" name="repairDate" id="repair-date" disabled required />
 					</div>
 					<div class="form-control">
 						<label for="name">Name</label>
-						<input type="text" name="name" id="name" placeholder="Lọc gió" required />
+						<input
+							type="text"
+							name="name"
+							id="name"
+							placeholder="Lọc gió"
+							disabled
+							required />
 					</div>
 					<div class="form-control">
 						<label for="price">Price</label>
-						<input type="text" name="price" id="price" placeholder="100.000" required />
+						<input
+							type="text"
+							name="price"
+							id="price"
+							placeholder="100.000"
+							disabled
+							required />
 					</div>
 					<div class="form-control">
 						<label for="status-damaged">Status damaged</label>
 						<input
 							type="text"
-							name="status-damaged"
+							name="statusDamaged"
 							id="status-damaged"
 							placeholder="Bị bụi bẩn"
+							disabled
 							required />
 					</div>
 					<div class="form-control">
 						<label for="repair-status">Repair status</label>
 						<input
 							type="text"
-							name="repair-status"
+							name="repairStatus"
 							id="repair-status"
 							placeholder="Làm sạch"
+							disabled
 							required />
 					</div>
 					<div class="form-submit">
-						<button id="save" type="submit">Save Accessory</button>
-						<button type="reset">Reset</button>
+						<button type="submit" disabled>Save Accessory</button>
+						<button type="reset" disabled>Reset</button>
 					</div>
 				</form>
-				<div class="data">
-					<div class="table-container">
-						<table>
-							<thead>
-								<tr>
-									<th>No <i class="fa fa-solid fa-sort fa-xs"></i></th>
-									<th>License plate <i class="fa fa-solid fa-sort fa-xs"></i></th>
-									<th>Repair date <i class="fa fa-solid fa-sort fa-xs"></i></th>
-									<th>Name <i class="fa fa-solid fa-sort fa-xs"></i></th>
-									<th>Price <i class="fa fa-solid fa-sort fa-xs"></i></th>
-									<th>
-										Status damaged <i class="fa fa-solid fa-sort fa-xs"></i>
-									</th>
-									<th>Repair status <i class="fa fa-solid fa-sort fa-xs"></i></th>
-									<th>Actions</th>
-								</tr>
-							</thead>
-							<tbody id="accessories"></tbody>
-						</table>
-					</div>
-					<div id="loading">
-						<div class="loading-icon"></div>
+				<div>
+					<div class="loading-wrapper">
+						<div class="table-container">
+							<table>
+								<thead>
+									<tr>
+										<th>No <i class="fa fa-solid fa-sort fa-xs"></i></th>
+										<th>
+											License plate <i class="fa fa-solid fa-sort fa-xs"></i>
+										</th>
+										<th>
+											Repair date <i class="fa fa-solid fa-sort fa-xs"></i>
+										</th>
+										<th>Name <i class="fa fa-solid fa-sort fa-xs"></i></th>
+										<th>Price <i class="fa fa-solid fa-sort fa-xs"></i></th>
+										<th>
+											Status damaged <i class="fa fa-solid fa-sort fa-xs"></i>
+										</th>
+										<th>
+											Repair status <i class="fa fa-solid fa-sort fa-xs"></i>
+										</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody id="accessories"></tbody>
+							</table>
+						</div>
+						<div id="loading"></div>
 					</div>
 					<div class="pagination">
-						<div class="pagination-size">
-							<select title="Số bản ghi mỗi trang" id="size">
+						<span class="pagination-size">
+							<select title="Số bản ghi mỗi trang" id="size" disabled>
 								<option value="10" selected>10</option>
 								<option value="25">25</option>
 								<option value="50">50</option>
 							</select>
 							<span>Record(s) per page.</span>
-						</div>
-						<div class="pagination-controls">
-							<button title="Trang đầu tiên" type="button" id="first-page">
+						</span>
+						<span class="pagination-controls">
+							<button title="Trang đầu tiên" type="button" id="first-page" disabled>
 								<i class="fa-solid fa-angles-left"></i>
 							</button>
-							<button title="Trang trước" type="button" id="prev-page">
+							<button title="Trang trước" type="button" id="prev-page" disabled>
 								<i class="fa-solid fa-angle-left"></i>
 							</button>
 							<input
@@ -114,14 +136,16 @@
 								type="number"
 								name="page"
 								id="page"
-								value="1" />
-							<button title="Trang sau" type="button" id="next-page">
+								value="1"
+								placeholder="1"
+								disabled />
+							<button title="Trang sau" type="button" id="next-page" disabled>
 								<i class="fa-solid fa-angle-right"></i>
 							</button>
-							<button title="Trang cuối cùng" type="button" id="last-page">
+							<button title="Trang cuối cùng" type="button" id="last-page" disabled>
 								<i class="fa-solid fa-angles-right"></i>
 							</button>
-						</div>
+						</span>
 					</div>
 				</div>
 			</main>
