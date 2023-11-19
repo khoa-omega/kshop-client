@@ -1,6 +1,6 @@
 const BASE_URL = "https://kshop-server.onrender.com";
 const form = document.getElementById("car-update-form");
-const loading = document.getElementById("loading");
+const loadings = document.getElementsByClassName("loading");
 const pageSize = document.getElementById("size");
 const firstPage = document.getElementById("first-page");
 const prevPage = document.getElementById("prev-page");
@@ -177,7 +177,9 @@ function showLoading() {
 	for (const select of selects) {
 		select.setAttribute("disabled", "");
 	}
-	loading.style.display = "grid";
+	for (const loading of loadings) {
+		loading.style.display = "grid";
+	}
 }
 
 function hideLoading() {
@@ -190,7 +192,9 @@ function hideLoading() {
 	for (const select of selects) {
 		select.removeAttribute("disabled");
 	}
-	loading.style.display = "none";
+	for (const loading of loadings) {
+		loading.style.display = "none";
+	}
 }
 
 function log(prefix, object, color) {

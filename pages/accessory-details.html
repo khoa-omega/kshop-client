@@ -82,7 +82,10 @@
 							required />
 					</div>
 					<div class="form-submit">
-						<button type="submit" disabled>Save Accessory</button>
+						<span class="save-wrapper">
+							<button type="submit" disabled>Save Accessory</button>
+							<span class="loading loading-sm"></span>
+						</span>
 						<button type="reset" disabled>Reset</button>
 					</div>
 				</form>
@@ -113,7 +116,7 @@
 								<tbody id="accessories"></tbody>
 							</table>
 						</div>
-						<div id="loading"></div>
+						<div class="loading"></div>
 					</div>
 					<div class="pagination">
 						<span class="pagination-size">

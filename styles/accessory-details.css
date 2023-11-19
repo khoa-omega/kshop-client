@@ -132,8 +132,15 @@ form {
 	}
 }
 
-.form-submit button {
-	padding: 4px 12px;
+.form-submit {
+	& .save-wrapper {
+		display: inline-block;
+		position: relative;
+	}
+
+	& button {
+		padding: 4px 12px;
+	}
 }
 
 .loading-wrapper {
@@ -198,7 +205,7 @@ tbody {
 	}
 }
 
-#loading {
+.loading {
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -217,6 +224,11 @@ tbody {
 		border-color: #d87093 transparent;
 		animation: rotate 400ms linear infinite;
 		place-self: center;
+	}
+
+	&.loading-sm::after {
+		width: 24px;
+		height: 24px;
 	}
 }
 

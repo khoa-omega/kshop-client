@@ -72,7 +72,10 @@
 							required />
 					</div>
 					<div class="form-submit">
-						<button type="submit" disabled>Save Car</button>
+						<span class="save-wrapper">
+							<button type="submit" disabled>Save Car</button>
+							<span class="loading loading-sm"></span>
+						</span>
 						<button type="reset" disabled>Reset</button>
 					</div>
 				</form>
@@ -107,7 +110,7 @@
 								</thead>
 								<tbody id="cars"></tbody>
 							</table>
-							<div id="loading"></div>
+							<div class="loading"></div>
 						</div>
 					</div>
 					<div class="pagination">

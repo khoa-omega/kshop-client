@@ -1,7 +1,6 @@
 const BASE_URL = "https://kshop-server.onrender.com";
 const FORMATTER = new Intl.NumberFormat("vi-VN");
 const form = document.getElementById("accessory-form");
-const loading = document.getElementById("loading");
 const pageSize = document.getElementById("size");
 const firstPage = document.getElementById("first-page");
 const prevPage = document.getElementById("prev-page");
@@ -11,6 +10,7 @@ const lastPage = document.getElementById("last-page");
 const tbody = document.getElementById("accessories");
 const inputs = document.getElementsByTagName("input");
 const buttons = document.getElementsByTagName("button");
+const loadings = document.getElementsByClassName("loading");
 const selects = document.getElementsByTagName("select");
 
 const [today] = new Date().toISOString().split("T");
@@ -22,7 +22,7 @@ form.addEventListener("submit", async function (e) {
 	const data = new FormData(this);
 	showLoading();
 	const accessory = Object.fromEntries(data.entries());
-	accessory.price = FORMATTER.format(accessory.price);
+	accessory.price = accessory.price.replace(/[,.]/g, "");
 	const savedAccessory = await save(accessory);
 	log("Saved accessory:", savedAccessory, "#27ae60");
 	const page = await findAll();
@@ -130,7 +130,7 @@ async function deleteById(id) {
 async function save(accessory) {
 	log("Saving accessory:", accessory, "#2980b9");
 	const url = accessory.id
-		? `${BASE_URL}/api/v1/accessories/${id}`
+		? `${BASE_URL}/api/v1/accessories/${accessory.id}`
 		: `${BASE_URL}/api/v1/accessories`;
 	const method = accessory.id ? "PUT" : "POST";
 	const response = await fetch(url, {
@@ -183,7 +183,9 @@ function showLoading() {
 	for (const select of selects) {
 		select.setAttribute("disabled", "");
 	}
-	loading.style.display = "grid";
+	for (const loading of loadings) {
+		loading.style.display = "grid";
+	}
 }
 
 function hideLoading() {
@@ -196,7 +198,9 @@ function hideLoading() {
 	for (const select of selects) {
 		select.removeAttribute("disabled");
 	}
-	loading.style.display = "none";
+	for (const loading of loadings) {
+		loading.style.display = "none";
+	}
 }
 
 function log(prefix, object, color) {
